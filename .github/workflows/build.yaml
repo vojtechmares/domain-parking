@@ -35,7 +35,7 @@ jobs:
         id: meta
         with:
           images: |
-            ${{ secrets.CONTAINER_REGISTRY }}/${{ github.repository }}/${{ matrix.target }}
+            ${{ secrets.CONTAINER_REGISTRY }}/${{ github.repository }}
           tags: |
             type=ref,event=branch,suffix=-${{ github.sha }}
             type=sha,format=long
