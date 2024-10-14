@@ -14,8 +14,6 @@ jobs:
 
       - name: Set up kubectl
         uses: azure/setup-helm@v4
-        with:
-          version: v3
 
       - name: Setup kubectl context
         uses: azure/k8s-set-context@v4
