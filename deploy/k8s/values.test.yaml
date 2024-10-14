@@ -1,0 +1,7 @@
+ingress:
+  enabled: true
+  annotations:
+    test: "true"
+  hosts:
+    - example.com
+    - acme.com

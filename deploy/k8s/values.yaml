@@ -1,0 +1,32 @@
+image:
+  pullSecrets: []
+  pullPolicy: IfNotPresent
+  repository: ghcr.io/vojtechmares/domain-parking
+  tag: latest
+
+replicas: 2
+
+ingress:
+  enabled: false
+  className: nginx
+  path: /
+  pathType: Prefix
+  annotations: {}
+  hosts: []
+
+service:
+  type: ClusterIP
+  port:
+    name: http
+    number: 80
+
+resources:
+  limits:
+    cpu: 50m
+    memory: 64Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+config:
+  port: 8080

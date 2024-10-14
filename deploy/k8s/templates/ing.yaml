@@ -1,0 +1,38 @@
+{{- if .Values.ingress.enabled -}}
+{{- $path := .Values.ingress.path -}}
+{{- $pathType := .Values.ingress.pathType -}}
+{{- $serviceName := .Release.Name -}}
+{{- $servicePortName := .Values.service.port.name -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}
+  annotations:
+    {{- range .Values.ingress.hosts }}
+    external-dns.alpha.kubernetes.io/hostname: "{{ . }}"
+    {{- end }}
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  tls:
+    - hosts:
+      {{- range .Values.ingress.hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .Release.Name }}-ingress-tls
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: {{ $path }}
+            pathType: {{ $pathType }}
+            backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  name: {{ $servicePortName }}
+    {{- end }}
+{{- end -}}

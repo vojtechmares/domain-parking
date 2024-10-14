@@ -1,0 +1,8 @@
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-dns-production
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "false"
+  hosts:
+    - docker-skoleni.cz
+    - cloudflare-skoleni.cz

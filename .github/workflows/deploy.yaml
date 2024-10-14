@@ -1,0 +1,29 @@
+name: Deploy to Kubernetes
+
+on:
+  workflow_run:
+    workflows: [ "Build", "Test" ]
+    types: [ completed ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-helm@v4
+        with:
+          version: v3
+
+      - name: Setup kubectl context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
+          context: ${{ secrets.KUBE_CONTEXT }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          helm upgrade --install --namespace domain-parking domain-parking ./deploy/k8s --values ./deploy/k8s/values.production.yaml
