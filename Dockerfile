@@ -10,7 +10,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 go build -o /build/domain-parking
 
-FROM alpine:3.20 AS runtime
+FROM alpine:3.21 AS runtime
 
 WORKDIR /srv
 
