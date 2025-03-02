@@ -24,20 +24,19 @@ jobs:
         with:
           version: latest
 
-      - name: Set up SSH agent and keys
+      - name: Deploy
+        env:
+          TAG: sha-${{ github.sha }}
         run: |
+          # set up SSH agent and keys
           sudo apt-get update && sudo apt-get install -y openssh-client
           eval $(ssh-agent -s)
           mkdir -p ~/.ssh && touch ~/.ssh/known_hosts
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add - > /dev/null
           ssh-keyscan -H ${{ secrets.SSH_REMOTE_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create Docker context
-        run: |
+          # create a Docker context for the remote host
           docker context create remote --docker "host=ssh://${{ secrets.SSH_REMOTE_USER }}@${{ secrets.SSH_REMOTE_HOST }}"
 
-      - name: Deploy
-        env:
-          TAG: sha-${{ github.sha }}
-        run: |
+          # Deploy the application using Docker Compose to remote host
           docker --context remote compose --file ./deploy/docker-compose.yml up --detach --force-recreate
