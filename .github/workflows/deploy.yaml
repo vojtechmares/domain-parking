@@ -26,7 +26,7 @@ jobs:
 
       - name: Set up SSH agent and keys
         run: |
-          apt-get update && apt-get install -y openssh-client
+          sudo apt-get update && sudo apt-get install -y openssh-client
           mkdir -p ~/.ssh
           chmod 600 ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add - > /dev/null
