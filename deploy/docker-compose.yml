@@ -1,0 +1,17 @@
+services:
+  app:
+    container_name: mareshq-domain-parking
+    # using env variable $TAG to specify the image tag
+    image: ghcr.io/vojtechmares/domain-parking:${TAG}
+    ports:
+      - "127.0.0.1:8080:8080"
+    restart: unless-stopped
+    environment:
+      APP_PORT: 8080
+    networks:
+      - mareshq-domain-parking-net
+
+networks:
+  mareshq-domain-parking-net:
+    name: mareshq-domain-parking-net
+    driver: bridge

@@ -1,5 +1,0 @@
-apiVersion: v2
-name: domain-parking
-description: A Helm chart for Kubernetes
-version: 0.1.0
-kubeVersion: ">=1.30.0-0"
