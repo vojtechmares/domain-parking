@@ -38,6 +38,6 @@ jobs:
 
       - name: Deploy
         env:
-          TAG: ${{ github.sha }}
+          TAG: sha-${{ github.sha }}
         run: |
           docker --context remote compose --file ./deploy/docker-compose.yml up --detach --force-recreate
