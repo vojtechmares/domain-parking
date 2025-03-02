@@ -16,19 +16,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up kubectl
-        uses: azure/setup-helm@v4
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
 
-      - name: Setup kubectl context
-        uses: azure/k8s-set-context@v4
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
         with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
-          context: ${{ secrets.KUBE_CONTEXT }}
+          version: latest
 
-      - name: Deploy to Kubernetes
+      - name: Set up SSH agent and keys
         run: |
-          helm upgrade --install --namespace domain-parking \
-            domain-parking ./deploy/k8s \
-            --values ./deploy/k8s/values.production.yaml \
-            --set image.tag=main-${{ github.sha }}
+          apt-get update && apt-get install -y openssh-client
+          mkdir -p ~/.ssh
+          chmod 600 ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add - > /dev/null
+          ssh-keyscan ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create Docker context
+        run: |
+          docker context create remote --docker "host=ssh://${{ secrets.SSH_REMOTE_USER }}@${{ env.REMOTE_HOST }}"
+
+      - name: Deploy
+        env:
+          TAG: ${{ github.sha }}
+        run: |
+          docker --context remote compose --file ./deploy/docker-compose.yml up --detach --force-recreate
