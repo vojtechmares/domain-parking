@@ -30,11 +30,11 @@ jobs:
           mkdir -p ~/.ssh
           chmod 600 ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add - > /dev/null
-          ssh-keyscan ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ github.env.REMOTE_HOST }} >> ~/.ssh/known_hosts
 
       - name: Create Docker context
         run: |
-          docker context create remote --docker "host=ssh://${{ secrets.SSH_REMOTE_USER }}@${{ env.REMOTE_HOST }}"
+          docker context create remote --docker "host=ssh://${{ secrets.SSH_REMOTE_USER }}@${{ github.env.REMOTE_HOST }}"
 
       - name: Deploy
         env:
