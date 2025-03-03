@@ -1,5 +1,5 @@
 services:
-  app:
+  domain-parking:
     container_name: mareshq-domain-parking
     # using env variable $TAG to specify the image tag
     image: ghcr.io/vojtechmares/domain-parking:${TAG}
