@@ -39,4 +39,4 @@ jobs:
           docker context create remote --docker "host=ssh://${{ secrets.SSH_REMOTE_USER }}@${{ secrets.SSH_REMOTE_HOST }}"
 
           # Deploy the application using Docker Compose to remote host
-          docker --context remote compose --file ./deploy/docker-compose.yml up --detach --force-recreate
+          docker --context remote compose --project-name domain-parking --file ./deploy/docker-compose.yml up --detach --force-recreate
