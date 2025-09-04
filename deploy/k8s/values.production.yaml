@@ -23,9 +23,11 @@ ingress:
     - kubernetes-skoleni.cz
     - terraform-skoleni.cz
     - rust-skoleni.cz
-    - zig-skoleni.cz
-    - paas.land
     - devops-skoleni.cz
     - devopsvkapse.cz
     - devops-akademie.cz
     - devopsakademie.cz
+    - zjaponska.cz
+    - gopheri.cz
+    - openstack.cz
+    - ziglang.cz
