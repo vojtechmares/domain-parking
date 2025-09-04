@@ -28,7 +28,7 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          helm upgrade --install --namespace domain-parking \
+          helm upgrade --install --namespace mareshq-domain-parking \
             domain-parking ./deploy/k8s \
             --values ./deploy/k8s/values.production.yaml \
             --set image.tag=main-${{ github.sha }}
