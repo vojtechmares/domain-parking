@@ -7,6 +7,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: deploy_live
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-24.04
@@ -30,5 +34,6 @@ jobs:
         run: |
           helm upgrade --install --namespace mareshq-domain-parking \
             domain-parking ./deploy/k8s \
+            --wait \
             --values ./deploy/k8s/values.production.yaml \
             --set image.tag=main-${{ github.sha }}
