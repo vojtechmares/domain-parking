@@ -7,13 +7,10 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Release.Name }}
+  {{- with .Values.ingress.annotations }}
   annotations:
-    {{- range .Values.ingress.hosts }}
-    external-dns.alpha.kubernetes.io/hostname: "{{ . }}"
-    {{- end }}
-    {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
-    {{- end }}
+  {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   tls:
