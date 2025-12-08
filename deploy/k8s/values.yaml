@@ -8,7 +8,7 @@ replicas: 2
 
 ingress:
   enabled: false
-  className: nginx
+  className: traefik
   path: /
   pathType: Prefix
   annotations: {}
