@@ -8,7 +8,7 @@ replicas: 2
 
 ingress:
   enabled: false
-  className: traefik
+  className: haproxy
   path: /
   pathType: Prefix
   annotations: {}
