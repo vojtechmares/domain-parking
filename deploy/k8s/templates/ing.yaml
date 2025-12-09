@@ -8,7 +8,7 @@ kind: Ingress
 metadata:
   name: {{ .Release.Name }}
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: {{ join "," .Values.ingress.hosts }}
+    external-dns.alpha.kubernetes.io/hostname: "{{ join "," .Values.ingress.hosts }}"
   {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
