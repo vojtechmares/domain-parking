@@ -3,6 +3,8 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/target: "lbh.knowing-koala.k8s.vxm.cz"
+    haproxy.org/ssl-redirect: "true"
   hosts:
     - docker-skoleni.cz
     - cloudflare-skoleni.cz
