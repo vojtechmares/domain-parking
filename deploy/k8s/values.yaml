@@ -8,7 +8,7 @@ replicas: 2
 
 ingress:
   enabled: false
-  className: haproxy
+  className: istio
   path: /
   pathType: Prefix
   annotations: {}
