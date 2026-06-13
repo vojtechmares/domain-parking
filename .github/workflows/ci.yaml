@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o server .
+      - if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: server
+          path: server
+          retention-days: 7
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: live
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: server
+      - name: Compute release id
+        id: rel
+        run: echo "id=$(date -u +%Y%m%dT%H%M%S)-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+      - name: Prepare SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Upload release
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+          REL: ${{ steps.rel.outputs.id }}
+        run: |
+          base=/opt/domain-parking
+          # REL/path intentionally expand on the runner before reaching the host.
+          # shellcheck disable=SC2029
+          ssh "$USER@$HOST" "mkdir -p $base/releases/$REL"
+          rsync -az --chmod=F0750 server "$USER@$HOST:$base/releases/$REL/server"
+      - name: Activate release
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+          REL: ${{ steps.rel.outputs.id }}
+        run: |
+          # REL intentionally expands on the runner into the remote command.
+          # shellcheck disable=SC2029
+          ssh "$USER@$HOST" "REL='$REL' bash -s" < deploy/release.sh

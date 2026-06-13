@@ -1,0 +1,27 @@
+[Unit]
+Description=domain-parking
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=domain-parking
+Group=domain-parking
+Environment=APP_PORT=8080
+# APP_HOST defaults to 127.0.0.1 in code; the app sits behind a local reverse proxy.
+ExecStart=/opt/domain-parking/current/server
+Restart=on-failure
+RestartSec=2s
+
+# Hardening: the app is stateless, logs to the journal, and never writes to disk.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectControlGroups=true
+ProtectKernelTunables=true
+RestrictAddressFamilies=AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

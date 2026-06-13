@@ -1,0 +1,3 @@
+# Allow the deploy user to restart the service after a release is staged.
+# Installed to /etc/sudoers.d/domain-parking by bootstrap.sh.
+deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart domain-parking
