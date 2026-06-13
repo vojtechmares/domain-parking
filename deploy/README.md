@@ -17,6 +17,7 @@ ssh/rsync.
 
 - `domain-parking.service` - systemd unit (`ExecStart=/opt/domain-parking/current/server`).
 - `domain-parking.sudoers` - lets the `deploy` user run `systemctl restart domain-parking`.
+- `Caddyfile` - Caddy config that fronts the app as a domain sink (on-demand TLS).
 - `bootstrap.sh` - one-time host setup (users, directories, unit, sudoers). Run as root.
 - `release.sh` - remote activate/health-check/rollback/prune, run by the workflow over ssh.
 
@@ -37,10 +38,27 @@ Then, on the host:
 1. Add the CI deploy **public** key to `~deploy/.ssh/authorized_keys`.
 2. Block external access to `:8080` at the host firewall - the app binds `127.0.0.1` by default,
    but defense in depth.
-3. Point the existing reverse proxy at `127.0.0.1:8080`, forwarding the `X-Forwarded-Host` header.
+3. Install Caddy in front of the app (see [Caddy](#caddy)).
 
 > The sudoers file hardcodes `/usr/bin/systemctl`. On a non usr-merged distro adjust the path to
 > match `command -v systemctl`.
+
+## Caddy
+
+Caddy sits in front of the app as a domain sink: point any domain's DNS at this host and Caddy
+serves it the parking page over HTTPS. Certificates are issued
+[on demand](https://caddyserver.com/docs/automatic-https#on-demand-tls) during the TLS handshake,
+gated by the app's `/check` ask endpoint - without that gate, anyone could force unbounded
+certificate issuance against the ACME CA. `/check` returns `200` only for a registrable apex
+domain (`example.com`, `example.co.uk`), so only those get a certificate. Caddy reverse-proxies
+matching requests to `127.0.0.1:8080`, forwarding the real host in `X-Forwarded-Host`.
+
+Install [`Caddyfile`](Caddyfile) as `/etc/caddy/Caddyfile` and reload (`systemctl reload caddy`).
+
+> The `@parkable` host matcher only proxies hosts with exactly two labels, so a domain on a
+> two-level public suffix (e.g. `example.co.uk`) is 404'd by Caddy even though `/check` would
+> allow its certificate. `/check` is the authoritative cert gate; the matcher is a coarse
+> pre-filter. Relax the regex if you need to park such domains.
 
 ## Tailscale
 

@@ -1,0 +1,29 @@
+# Caddy fronts domain-parking as a domain sink. Any apex domain pointed at this
+# host gets a certificate on demand, gated by the app's /check ask endpoint, and
+# is served the parking page. Install at /etc/caddy/Caddyfile (or import it).
+
+{
+	# On-demand TLS asks the app before issuing a certificate, so only
+	# registrable apex domains (example.com, example.co.uk) get one.
+	on_demand_tls {
+		ask http://127.0.0.1:8080/check
+	}
+}
+
+:80, :443 {
+	tls {
+		on_demand
+	}
+
+	# Only proxy apex-looking hosts to the app; everything else is 404'd.
+	@parkable host_regexp ^[^.]+\.[^.]+$
+	handle @parkable {
+		reverse_proxy 127.0.0.1:8080 {
+			header_up X-Forwarded-Host {host}
+		}
+	}
+
+	handle {
+		respond "Not found" 404
+	}
+}

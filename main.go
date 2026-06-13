@@ -9,8 +9,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
+
+	"golang.org/x/net/publicsuffix"
 )
 
 func main() {
@@ -29,11 +32,14 @@ func main() {
 		port = "8080"
 	}
 
-	srv := http.Server{
-		Addr: net.JoinHostPort(host, port),
-	}
+	mux := http.NewServeMux()
+	mux.HandleFunc("/check", checkHandler)
+	mux.HandleFunc("/", handler)
 
-	http.HandleFunc("/", handler)
+	srv := http.Server{
+		Addr:    net.JoinHostPort(host, port),
+		Handler: mux,
+	}
 
 	// Start the server
 	go func() {
@@ -110,6 +116,25 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
 
-	w.WriteHeader(http.StatusOK)
+// isRegistrableApex reports whether host is exactly a registrable domain
+// (e.g. example.com, example.co.uk) with no extra subdomain labels.
+func isRegistrableApex(host string) bool {
+	host = strings.ToLower(host)
+	etld1, err := publicsuffix.EffectiveTLDPlusOne(host)
+	if err != nil {
+		return false
+	}
+	return host == etld1
+}
+
+// checkHandler is Caddy's on_demand_tls ask endpoint: it allows certificate
+// issuance only for registrable apex domains.
+func checkHandler(w http.ResponseWriter, r *http.Request) {
+	if isRegistrableApex(r.URL.Query().Get("domain")) {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	w.WriteHeader(http.StatusForbidden)
 }
