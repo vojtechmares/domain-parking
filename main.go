@@ -5,6 +5,7 @@ import (
 	"errors"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,13 +19,18 @@ func main() {
 
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 
+	host := os.Getenv("APP_HOST")
+	if host == "" {
+		host = "127.0.0.1"
+	}
+
 	port := os.Getenv("APP_PORT")
 	if port == "" {
 		port = "8080"
 	}
 
 	srv := http.Server{
-		Addr: ":" + port,
+		Addr: net.JoinHostPort(host, port),
 	}
 
 	http.HandleFunc("/", handler)
