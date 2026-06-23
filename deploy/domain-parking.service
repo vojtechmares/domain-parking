@@ -7,7 +7,8 @@ Wants=network-online.target
 Type=simple
 User=domain-parking
 Group=domain-parking
-Environment=APP_PORT=8080
+# Port 8090, not the app's 8080 default: 8080 is already taken by zitadel on the host.
+Environment=APP_PORT=8090
 # APP_HOST defaults to 127.0.0.1 in code; the app sits behind a local reverse proxy.
 ExecStart=/opt/domain-parking/current/server
 Restart=on-failure

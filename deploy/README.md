@@ -36,7 +36,7 @@ and sudoers drop-in, and `enable`s the service (it starts on the first deploy).
 Then, on the host:
 
 1. Add the CI deploy **public** key to `~deploy/.ssh/authorized_keys`.
-2. Block external access to `:8080` at the host firewall - the app binds `127.0.0.1` by default,
+2. Block external access to `:8090` at the host firewall - the app binds `127.0.0.1` by default,
    but defense in depth.
 3. Install Caddy in front of the app (see [Caddy](#caddy)).
 
@@ -51,7 +51,7 @@ serves it the parking page over HTTPS. Certificates are issued
 gated by the app's `/check` ask endpoint - without that gate, anyone could force unbounded
 certificate issuance against the ACME CA. `/check` returns `200` only for a registrable apex
 domain (`example.com`, `example.co.uk`), so only those get a certificate. Caddy reverse-proxies
-matching requests to `127.0.0.1:8080`, forwarding the real host in `X-Forwarded-Host`.
+matching requests to `127.0.0.1:8090`, forwarding the real host in `X-Forwarded-Host`.
 
 Install [`Caddyfile`](Caddyfile) as `/etc/caddy/Caddyfile` and reload (`systemctl reload caddy`).
 

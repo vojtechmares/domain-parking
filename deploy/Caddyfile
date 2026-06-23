@@ -6,7 +6,7 @@
 	# On-demand TLS asks the app before issuing a certificate, so only
 	# registrable apex domains (example.com, example.co.uk) get one.
 	on_demand_tls {
-		ask http://127.0.0.1:8080/check
+		ask http://127.0.0.1:8090/check
 	}
 }
 
@@ -18,7 +18,7 @@
 	# Only proxy apex-looking hosts to the app; everything else is 404'd.
 	@parkable host_regexp ^[^.]+\.[^.]+$
 	handle @parkable {
-		reverse_proxy 127.0.0.1:8080 {
+		reverse_proxy 127.0.0.1:8090 {
 			header_up X-Forwarded-Host {host}
 		}
 	}

@@ -30,7 +30,7 @@ sudo systemctl restart domain-parking
 # Health gate: up to 10 attempts, 1s apart.
 ok=""
 for _ in $(seq 1 10); do
-  if curl -fsS -H 'X-Forwarded-Host: deploy-check' http://127.0.0.1:8080/ >/dev/null; then
+  if curl -fsS -H 'X-Forwarded-Host: deploy-check' http://127.0.0.1:8090/ >/dev/null; then
     ok=1
     break
   fi
